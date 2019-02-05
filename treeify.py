@@ -32,7 +32,7 @@ master = ""
 
 tree.create_node("Old Archive", "Old Archive/")
 
-for a in arr[1:100]:
+for a in arr[1:1000]:
     prev = None
     a.path = str(a.path).replace("\\x00", "")[2:-5]
     a.md5 = str(a.md5).replace("\\x00", "")[2:-1]
@@ -42,11 +42,18 @@ for a in arr[1:100]:
     print(a.path)
     print(a.md5)
     master = ""
-    for folder in a.path.split("/"):
+    for folder in a.path.split("/")[:-1]:
         master += folder + "/"
         if tree.get_node(master) == None:
             tree.create_node(folder, master, parent=prev)
         prev = master
 
+    master += folder + "/"
+    if tree.get_node(master) == None:
+        tree.create_node(folder, master, parent=prev, data=a)
+    prev = master
+
 
 print(tree.show())
+print(tree.depth())
+
