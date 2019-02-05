@@ -1,14 +1,52 @@
 import sys
+import string
+import os
+from treelib import Node, Tree
 
-class Node:
-    childList = [    ]
-    name = ""
-    hash = ""
+if len(sys.argv) < 2:
+        print("Usage:\npython3 convert.py <text file>")
+        sys.exit(1)
+filename = sys.argv[1]
 
-    def __init__(self, name, hash, childList):
-        self.name = name
-        self.hash = hash
-        self.childList = childList
+class line(object):
+	path = ""
+	md5 = ""
+	isUnique = True #assume there are no copies until proven otherwise
 
-#enter execution
-print("hello world")
+	def __init__(self, p, h):
+		self.path = p
+		self.md5 = h
+
+
+tree = Tree()
+
+file = open(filename, "rb")
+arr = []
+
+for l in file:
+    if len(l) > 48:
+        arr.append( line(l[100:], l[0:94]) )
+
+prev= None
+master = ""
+
+tree.create_node("Old Archive", "Old Archive/")
+
+for a in arr[1:100]:
+    prev = None
+    a.path = str(a.path).replace("\\x00", "")[2:-5]
+    a.md5 = str(a.md5).replace("\\x00", "")[2:-1]
+    a.path = str(a.path).replace("\\\\", "/")
+    a.path = str(a.path).replace("\r", "")
+    a.path = str(a.path).replace("\n", "")
+    print(a.path)
+    print(a.md5)
+    master = ""
+    for folder in a.path.split("/"):
+        master += folder + "/"
+        if tree.get_node(master) == None:
+            tree.create_node(folder, master, parent=prev)
+        prev = master
+
+
+print(tree.show())
