@@ -43,7 +43,7 @@ master = ""
 
 tree.create_node("Old Archive", "Old Archive/")
 
-for a in arr[1:69800]:
+for a in arr[1:]:
     prev = None
     a.path = str(a.path).replace("\\x00", "")[2:-5]
     a.md5 = str(a.md5).replace("\\x00", "")[2:-1]
