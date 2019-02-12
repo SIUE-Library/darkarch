@@ -12,6 +12,7 @@ filename = sys.argv[1]
 class line(object):
 	path = ""
 	md5 = ""
+	clone = ""
 	isUnique = True #assume there are no copies until proven otherwise
 
 	def __init__(self, p, h):
@@ -34,8 +35,10 @@ for l in file:
 dic = Counter(hashes)
 
 for a in arr:
-    if dic[a.path] > 1:
-        a.isUnique = False
+    for r in arr:
+        if a.path != r.path and a.md5 == r.md5:
+            a.isUnique = False
+            a.clone = r.path
     
 
 prev= None
@@ -45,11 +48,17 @@ tree.create_node("Old Archive", "Old Archive/")
 
 for a in arr[1:]:
     prev = None
-    a.path = str(a.path).replace("\\x00", "")[2:-5]
     a.md5 = str(a.md5).replace("\\x00", "")[2:-1]
+    a.path = str(a.path).replace("\\x00", "")[2:-5]
     a.path = str(a.path).replace("\\\\", "/")
     a.path = str(a.path).replace("\r", "")
     a.path = str(a.path).replace("\n", "")
+
+    a.clone = str(a.clone).replace("\\x00", "")[2:-5]
+    a.clone = str(a.clone).replace("\\\\", "/")
+    a.clone = str(a.clone).replace("\r", "")
+    a.clone = str(a.clone).replace("\n", "")
+
     print(a.path)
     print(a.md5)
     master = ""
@@ -62,7 +71,7 @@ for a in arr[1:]:
     print(folder)
     master += folder + "/"
     if tree.get_node(master) == None:
-        tree.create_node(folder, master, parent=prev)
+        tree.create_node(str(a.isUnique)+" ("+a.path+")", master, parent=prev)
     prev = master
 
 
