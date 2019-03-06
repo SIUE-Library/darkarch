@@ -20,7 +20,11 @@ file = open(filename, "rb")
 arr = []
 
 for l in file:
-	arr.append( line(l[94:], l[0:94]) )
+	li = str(l).replace("\\x00", "")
+	li = li.replace("\\\\", "/")
+	li = li.replace("\r", "")
+	li = li.replace("\n", "")
+	arr.append( line(li[94:-1], li[2:94]) )
 
 print("Hash,File A,File Two")
 for l in range(1, len(arr)-1):

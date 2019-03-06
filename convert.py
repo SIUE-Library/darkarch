@@ -23,8 +23,18 @@ arr = []
 
 for l in file:
     if len(l) > 48:
-        arr.append( line(l[99:], l[0:94]) )
+        arr.append( line(l[101:], l[0:94]) )
+c = 0
 
+for a in arr:
+    for r in arr:
+        if a.path != r.path and a.md5 == r.md5:
+            a.isUnique = False
+            a.clone = r.path
+    c+=1
+    print("One iter complete, this is "+str(c) +" of "+str(len(arr)))
+
+print("Creating Files")
 for a in arr:
 #    print(type(a.path))
     a.path = str(a.path).replace("\\x00", "")[2:-5]
@@ -40,4 +50,4 @@ for a in arr:
         if not os.path.exists(master):
             os.mkdir(master)
 
-    file = open(a.path+"_COPY.txt", "w+").write(a.md5)
+    file = open(a.path+"_"+str(a.isUnique)+"_COPY.txt", "w+").write(a.md5)

@@ -3,11 +3,52 @@ import string
 import os
 from treelib import Node, Tree
 from collections import Counter
+import time
 
 if len(sys.argv) < 2:
         print("Usage:\npython3 convert.py <text file>")
         sys.exit(1)
 filename = sys.argv[1]
+
+def DFS(T):
+    stack = []
+    visited = []
+    uniqueFolder = 0
+    totFolder = 0
+    stack.append(T.get_node("Old Archive/"))
+    while len(stack) > 0:
+        next = stack.pop()
+        for child in next.fpointer:
+            stack.append(T.get_node(child))
+            if T.get_node(child).is_leaf():
+                print(T.get_node(child).data.clone)
+
+
+        unique = 0
+        for child in next.fpointer:
+            if str(T.get_node(child).tag) == "True":
+                unique = 1
+        if not next.is_leaf():
+            next.tag = str(unique == 1)
+            uniqueFolder += unique
+            totFolder += 1
+
+    print(uniqueFolder)
+    print(totFolder)
+
+def toPrune(T):
+    stack = []
+    visited = []
+    stack.append(T.get_node("Old Archive/"))
+    while len(stack) > 0:
+        next = stack.pop()
+        if next.tag != "False":
+            for child in next.fpointer:
+                stack.append(T.get_node(child))
+        else:
+            print(next.identifier)
+
+
 
 class line(object):
 	path = ""
@@ -32,18 +73,20 @@ for l in file:
         arr.append( line(l[100:], l[0:94]) )
         hashes.append(l[0:94])
 
-dic = Counter(hashes)
 
+c = 0
+l = len(arr)
 for a in arr:
     for r in arr:
         if a.path != r.path and a.md5 == r.md5:
             a.isUnique = False
             a.clone = r.path
+    print("Completed iteration "+str(c)+" of "+str(l))
+    c+=1
     
-
 prev= None
 master = ""
-
+print("Deduping done")
 tree.create_node("Old Archive", "Old Archive/")
 
 for a in arr[1:]:
@@ -59,8 +102,6 @@ for a in arr[1:]:
     a.clone = str(a.clone).replace("\r", "")
     a.clone = str(a.clone).replace("\n", "")
 
-    print(a.path)
-    print(a.md5)
     master = ""
     for folder in a.path.split("/")[0:-1]:
         master += folder + "/"
@@ -68,13 +109,16 @@ for a in arr[1:]:
             tree.create_node(folder, master, parent=prev)
         prev = master
     folder = a.path.split("/")[-1:][0]
-    print(folder)
     master += folder + "/"
     if tree.get_node(master) == None:
-        tree.create_node(str(a.isUnique)+" ("+a.path+")", master, parent=prev)
+        tree.create_node(str(a.isUnique), master, parent=prev, data=a)
     prev = master
 
 
-print(tree.show())
+#print(tree.show())
 print(tree.depth())
+#time.sleep(1)
 
+
+DFS(tree)
+toPrune(tree)
